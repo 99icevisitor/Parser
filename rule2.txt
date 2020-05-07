@@ -1,0 +1,7 @@
+G=({E,T,F},{+,x,j,k,i},P,E)
+E->E+T
+E->T
+T->TxF
+T->F
+F->i
+F->jEk
