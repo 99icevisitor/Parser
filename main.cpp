@@ -1,4 +1,4 @@
-//LR(1)Óï·¨·ÖÎö 
+//LR(1)è¯­æ³•åˆ†æ 
 using namespace std;
 #include<iostream>
 #include<string>
@@ -7,13 +7,13 @@ using namespace std;
 #include<algorithm>
 #include<iomanip>
 #define max 100000
-//ACTION-GOTO±í
-//Ã¿Ò»¸öÎÄ·¨·ûºÅµÄfirst¼¯
+//ACTION-GOTOè¡¨
+//æ¯ä¸€ä¸ªæ–‡æ³•ç¬¦å·çš„firsté›†
 int ruleCount[200]={0};
 struct FIRST_X{//X[0-199]:Vn(Vn[i]) X[200-399]:Vt(Vt[i+200])
 	char X[400];
-	int set[400][40];//set[i][j]=¶ÔÓ¦µÄindex -1:$ ,0-199:VtIndex
-	int count[400];//¼ÇÂ¼Ã¿Ò»¸öfirst¼¯ÖĞÔªËØµÄÊıÁ¿ 
+	int set[400][40];//set[i][j]=å¯¹åº”çš„index -1:$ ,0-199:VtIndex
+	int count[400];//è®°å½•æ¯ä¸€ä¸ªfirsté›†ä¸­å…ƒç´ çš„æ•°é‡ 
 };
 struct FRIST_Y{
 	char Y[20];
@@ -24,48 +24,48 @@ struct FIRST_T{
 	int set[40];
 	int count;
 };
-struct FOLLOW_X{//X[0-199]:Vn(ÏÂ±êÓëVnÊı×éÖĞÏàÍ¬)
+struct FOLLOW_X{//X[0-199]:Vn(ä¸‹æ ‡ä¸Vnæ•°ç»„ä¸­ç›¸åŒ)
 	char X[200];
-	int set[200][40];//set[i][j]=¶ÔÓ¦µÄÖÕ½á·ûµÄÏÂ±ê -1:# ,0-199:VtIndex
+	int set[200][40];//set[i][j]=å¯¹åº”çš„ç»ˆç»“ç¬¦çš„ä¸‹æ ‡ -1:# ,0-199:VtIndex
 	int count[200];
 };
 struct VnAttribute{
-	int index[200][20];//ÔÚ¼ÆËãÊ±´æ´¢ÊÇ·ñ»¹ÔÚÁĞ±íÖĞ (index:0 ~ VnNum-1)(index[i][0]:²úÉúÊ½¸öÊı)(index[i][1 ~ ¸öÊı]:²úÉúÊ½µÄĞòºÅ£¬´Ó1¿ªÊ¼)(index[i]Ò»¹²ÓĞ¸öÊı+1¸ö)
-	int is2empty[200];//ÊÇ·ñ¿ÉÍÆµ¼³ö¿Õ (Î´¶¨£º-1£»²»¿ÉÒÔ£º1£»¿ÉÒÔ£º0)
-	int initNum[200];//index[i][0]:²úÉúÊ½µÄ³õÊ¼¸öÊı
+	int index[200][20];//åœ¨è®¡ç®—æ—¶å­˜å‚¨æ˜¯å¦è¿˜åœ¨åˆ—è¡¨ä¸­ (index:0 ~ VnNum-1)(index[i][0]:äº§ç”Ÿå¼ä¸ªæ•°)(index[i][1 ~ ä¸ªæ•°]:äº§ç”Ÿå¼çš„åºå·ï¼Œä»1å¼€å§‹)(index[i]ä¸€å…±æœ‰ä¸ªæ•°+1ä¸ª)
+	int is2empty[200];//æ˜¯å¦å¯æ¨å¯¼å‡ºç©º (æœªå®šï¼š-1ï¼›ä¸å¯ä»¥ï¼š1ï¼›å¯ä»¥ï¼š0)
+	int initNum[200];//index[i][0]:äº§ç”Ÿå¼çš„åˆå§‹ä¸ªæ•°
 }; 
-struct initItem{//³õÊ¼ÏîÄ¿×ÜºÍ 0:S'->¡¤Start,# ;1: S'->Start¡¤,# 
-	int ruleIndex[500];//²úÉúÊ½ĞòºÅ 0:ÈË¹¤ÌáÈ¡³öÀ´µÄ²úÉúÊ½ >=1:ÊäÈëµÄ²úÉúÊ½ 
-	int potIndex[500];//¡¤µÄÎ»ÖÃ 
-	int INum;//³õÊ¼ÏîÄ¿ÊıÁ¿ 
+struct initItem{//åˆå§‹é¡¹ç›®æ€»å’Œ 0:S'->Â·Start,# ;1: S'->StartÂ·,# 
+	int ruleIndex[500];//äº§ç”Ÿå¼åºå· 0:äººå·¥æå–å‡ºæ¥çš„äº§ç”Ÿå¼ >=1:è¾“å…¥çš„äº§ç”Ÿå¼ 
+	int potIndex[500];//Â·çš„ä½ç½® 
+	int INum;//åˆå§‹é¡¹ç›®æ•°é‡ 
 };
-struct Item{//ÏîÄ¿ 
-	int initIndex;//ÄÄÒ»¸ö³õÊ¼ÏîÄ¿ 
-	int set[40];//$-closure(I)µÄÄÚÈİ -1:# ;0-VtNum:Vt
-	int setCount;//$-closure(I)µÄÊıÁ¿ 
+struct Item{//é¡¹ç›® 
+	int initIndex;//å“ªä¸€ä¸ªåˆå§‹é¡¹ç›® 
+	int set[40];//$-closure(I)çš„å†…å®¹ -1:# ;0-VtNum:Vt
+	int setCount;//$-closure(I)çš„æ•°é‡ 
 	int attr[7];
-	//attr[0]:ËùÊôÏîÄ¿¼¯ĞòºÅ
-	//attr[1]:ÔÚÏîÄ¿¼¯ÖĞµÄĞòºÅ 
-	//attr[2]:ÏîÄ¿×´Ì¬-1:Î´±ê¼Ç;0:ÒÆ½øÏîÄ¿(¡¤Ö®ºóÊÇVt); 1:´ıÔ¼ÏîÄ¿(¡¤Ö®ºóÊÇVn); 2:¹éÔ¼ÏîÄ¿(¡¤ÔÚ×îºó); 3:accÏî;
-	//attr[3]:Vindex ¿ç¹ıµÄÔªËØµÄÏÂ±ê Vt[200,399],Vn[0,199] 
-	//attr[4]:¿çÔªËØºóÏÂÒ»¸öÏîÄ¿¼¯ĞòºÅ 
-	//attr[5]:¿çÔªËØºóÏÂÒ»¸öÏîÄ¿¼¯ÖĞµÄĞòºÅ 
-	//attr[6]:¸ÃÌõÏîÄ¿ÊÇ·ñÒÑ¾­Ïòºó¼ì²é¹ıÁË 0:³õÊ¼¡¢Ã»ÓĞ¼ì²é¹ı£»1:¼ì²é¹ıÁË 
+	//attr[0]:æ‰€å±é¡¹ç›®é›†åºå·
+	//attr[1]:åœ¨é¡¹ç›®é›†ä¸­çš„åºå· 
+	//attr[2]:é¡¹ç›®çŠ¶æ€-1:æœªæ ‡è®°;0:ç§»è¿›é¡¹ç›®(Â·ä¹‹åæ˜¯Vt); 1:å¾…çº¦é¡¹ç›®(Â·ä¹‹åæ˜¯Vn); 2:å½’çº¦é¡¹ç›®(Â·åœ¨æœ€å); 3:accé¡¹;
+	//attr[3]:Vindex è·¨è¿‡çš„å…ƒç´ çš„ä¸‹æ ‡ Vt[200,399],Vn[0,199] 
+	//attr[4]:è·¨å…ƒç´ åä¸‹ä¸€ä¸ªé¡¹ç›®é›†åºå· 
+	//attr[5]:è·¨å…ƒç´ åä¸‹ä¸€ä¸ªé¡¹ç›®é›†ä¸­çš„åºå· 
+	//attr[6]:è¯¥æ¡é¡¹ç›®æ˜¯å¦å·²ç»å‘åæ£€æŸ¥è¿‡äº† 0:åˆå§‹ã€æ²¡æœ‰æ£€æŸ¥è¿‡ï¼›1:æ£€æŸ¥è¿‡äº† 
 };
-struct ItemSet{//ÏîÄ¿¼¯ 
+struct ItemSet{//é¡¹ç›®é›† 
 	Item item[40];
-	int itemNum;//Ò»¸öÏîÄ¿¼¯ÖĞÏîÄ¿ÊıÁ¿
-	bool isCheck;//ÊÇ·ñÒÑ¾­¼ì²é¹ı(ËùÓĞÏîÄ¿µÄ¼ì²é±êÖ¾Î»¶¼Îª1)
-	bool isFilter;//ÊÇ·ñÒÑ¾­¹ıÂË¹ı(ËùÓĞÏîÄ¿¶¼ÒÑ¾­ÖªµÀÁË×´Ì¬) 
+	int itemNum;//ä¸€ä¸ªé¡¹ç›®é›†ä¸­é¡¹ç›®æ•°é‡
+	bool isCheck;//æ˜¯å¦å·²ç»æ£€æŸ¥è¿‡(æ‰€æœ‰é¡¹ç›®çš„æ£€æŸ¥æ ‡å¿—ä½éƒ½ä¸º1)
+	bool isFilter;//æ˜¯å¦å·²ç»è¿‡æ»¤è¿‡(æ‰€æœ‰é¡¹ç›®éƒ½å·²ç»çŸ¥é“äº†çŠ¶æ€) 
 	char array[40];
 	int arrayNum;
 };
-struct ItemSets{//ÏîÄ¿¼¯×å 
-	ItemSet ISet[200];//ÏîÄ¿¼¯ÁĞ±í 
-	initItem initI;//³õÊ¼ÏîÄ¿  
-	int ISetNum;//ÏîÄ¿¼¯ÊıÁ¿ 
-	int changeMap[400][3];//×ª»»º¯Êı I_i--V-->I_j
-	int changeNum;//×ª»»º¯ÊıÊıÁ¿ 
+struct ItemSets{//é¡¹ç›®é›†æ— 
+	ItemSet ISet[200];//é¡¹ç›®é›†åˆ—è¡¨ 
+	initItem initI;//åˆå§‹é¡¹ç›®  
+	int ISetNum;//é¡¹ç›®é›†æ•°é‡ 
+	int changeMap[400][3];//è½¬æ¢å‡½æ•° I_i--V-->I_j
+	int changeNum;//è½¬æ¢å‡½æ•°æ•°é‡ 
 };
 bool isAllChecked(ItemSet ISet){
 	bool ok=true;
@@ -87,14 +87,14 @@ bool isAllFiltered(ItemSet ISet){
 	}
 	return ok;
 }
-//¶ÑÕ»
+//å †æ ˆ
 struct wrongMsg{
 	int ID;
 	char wrongChar;
 	int row;
 	int col;
 };
-struct Token{//¼ÇÂ¼Token 
+struct Token{//è®°å½•Token 
 	string content;
 	int type;
 };
@@ -179,7 +179,7 @@ VnAttribute isEmpty(char rules[200][100],int number,char Vn[200],char Vt[200],in
 		attr.index[i][0] = 0;
 		attr.is2empty[i] = -1;
 	}
-	for(int i=1;i<number;i++){//ÏÈ±ê¼ÇËùÓĞµÄ·ÇÖÕ½á·ûËùÔÚ²úÉúÊ½µÄ¸öÊıºÍĞòºÅ 
+	for(int i=1;i<number;i++){//å…ˆæ ‡è®°æ‰€æœ‰çš„éç»ˆç»“ç¬¦æ‰€åœ¨äº§ç”Ÿå¼çš„ä¸ªæ•°å’Œåºå· 
 		VnIndex=getVnIndex(rules[i][0],Vn,VnNum);
 		attr.index[VnIndex][0]++;
 		id = attr.index[VnIndex][0];
@@ -192,19 +192,19 @@ VnAttribute isEmpty(char rules[200][100],int number,char Vn[200],char Vt[200],in
 		}
 	}
 	//first round 
-	for(int i=1;i<number;i++){//É¨ÃèÃ¿¸ö²úÉúÊ½ 
+	for(int i=1;i<number;i++){//æ‰«ææ¯ä¸ªäº§ç”Ÿå¼ 
 		if(array[i]==0){
 			continue;
 		}
-		for(int j=1;j<getRuleLength(rules[i]);j++){//É¨Ãè²úÉúÊ½ÓÒ²¿ £¬²ú¿´ÊÇ·ñº¬ÓĞÖÕ½á·ûVt
-			if(isVt(rules[i][j],Vt,VtNum)){//Èç¹ûÓĞ 
+		for(int j=1;j<getRuleLength(rules[i]);j++){//æ‰«æäº§ç”Ÿå¼å³éƒ¨ ï¼Œäº§çœ‹æ˜¯å¦å«æœ‰ç»ˆç»“ç¬¦Vt
+			if(isVt(rules[i][j],Vt,VtNum)){//å¦‚æœæœ‰ 
 				VnIndex = getVnIndex(rules[i][0],Vn,VnNum);
 				for(int k=1;k<attr.initNum[VnIndex]+1;k++){
-					if(attr.index[VnIndex][k]==i){//ÔòÉ¾³ıÕâĞĞ²úÉúÊ½
+					if(attr.index[VnIndex][k]==i){//åˆ™åˆ é™¤è¿™è¡Œäº§ç”Ÿå¼
 						attr.index[VnIndex][k]=-1;
 						int newCount = 0;
 						for(int s=1;s<attr.initNum[VnIndex]+1;s++){
-							if(attr.index[VnIndex][s]!=-1){//ÖØĞÂ¼ÆËãÊ£Óà²úÉúÊ½ÊıÁ¿ 
+							if(attr.index[VnIndex][s]!=-1){//é‡æ–°è®¡ç®—å‰©ä½™äº§ç”Ÿå¼æ•°é‡ 
 								newCount++;
 							}
 						}
@@ -215,7 +215,7 @@ VnAttribute isEmpty(char rules[200][100],int number,char Vn[200],char Vt[200],in
 				break;
 			}
 		}
-		if(rules[i][1]=='$'&&getRuleLength(rules[i])==2){//É¨Ãè²úÉúÊ½ÓÒ²¿ £¬ÊÇ·ñÊÇ¿Õ->ÊÇ£¬ÔòÉ¾³ıÒÔ¸Ã²úÉúÊ½µÄ×ó²¿Îª×ó²¿µÄËùÓĞ²úÉúÊ½£¬²¢ÖÃ¸Ã·ÇÖÕ½á·ûÎª¿ÉÍÆµ¼³ö¿Õ
+		if(rules[i][1]=='$'&&getRuleLength(rules[i])==2){//æ‰«æäº§ç”Ÿå¼å³éƒ¨ ï¼Œæ˜¯å¦æ˜¯ç©º->æ˜¯ï¼Œåˆ™åˆ é™¤ä»¥è¯¥äº§ç”Ÿå¼çš„å·¦éƒ¨ä¸ºå·¦éƒ¨çš„æ‰€æœ‰äº§ç”Ÿå¼ï¼Œå¹¶ç½®è¯¥éç»ˆç»“ç¬¦ä¸ºå¯æ¨å¯¼å‡ºç©º
 			array[i]=0;
 			VnIndex = getVnIndex(rules[i][0],Vn,VnNum);
 			attr.is2empty[VnIndex]=0;
@@ -229,7 +229,7 @@ VnAttribute isEmpty(char rules[200][100],int number,char Vn[200],char Vt[200],in
 		} 	
 	}
 	for(int j=0;j<VnNum;j++){ 
-		if(attr.is2empty[j]!=-2){//Èç¹û¸Ã·ÇÖÕ½á·ûÎª×ó²¿µÄ²úÉúÊ½¾ù±»É¾³ı£¬ËµÃ÷²»¿ÉÒÔÍÆ³ö¿Õ
+		if(attr.is2empty[j]!=-2){//å¦‚æœè¯¥éç»ˆç»“ç¬¦ä¸ºå·¦éƒ¨çš„äº§ç”Ÿå¼å‡è¢«åˆ é™¤ï¼Œè¯´æ˜ä¸å¯ä»¥æ¨å‡ºç©º
 			if(attr.index[j][0]==0&&attr.is2empty[j]!=0){
 				attr.is2empty[j] = 1;
 			}
@@ -249,11 +249,11 @@ VnAttribute isEmpty(char rules[200][100],int number,char Vn[200],char Vt[200],in
 		isSame = true;
 		Ccount++;
 		for(int i=0;i<number;i++){
-			if(array[i]==1){//¶ÔÁôÏÂÀ´µÄ²úÉúÊ½µÄÓÒ²¿½øĞĞÉ¨Ãè 
+			if(array[i]==1){//å¯¹ç•™ä¸‹æ¥çš„äº§ç”Ÿå¼çš„å³éƒ¨è¿›è¡Œæ‰«æ 
 				count = 0;
 				for(int j=1;j<getRuleLength(rules[i]);j++){
 					VnIndex = getVnIndex(rules[i][j],Vn,VnNum);
-					if(attr.is2empty[VnIndex]==1){//¸ÃÓÒ²¿·ÇÖÕ½á·û²»¿ÉÍÆµ¼³ö £¬É¾³ı¸ÃĞĞ²úÉúÊ½ 
+					if(attr.is2empty[VnIndex]==1){//è¯¥å³éƒ¨éç»ˆç»“ç¬¦ä¸å¯æ¨å¯¼å‡º ï¼Œåˆ é™¤è¯¥è¡Œäº§ç”Ÿå¼ 
 						VnIndex = getVnIndex(rules[i][0],Vn,VnNum);
 						for(int k=1;k<attr.initNum[VnIndex]+1;k++){
 							if(attr.index[VnIndex][k]==i){
@@ -268,19 +268,19 @@ VnAttribute isEmpty(char rules[200][100],int number,char Vn[200],char Vt[200],in
 							}
 						}
 						array[i]=0;
-						//Èôµ¼ÖÂ¸Ã·ÇÖÕ½á·ûÎª×ó²¿µÄ²úÉúÊ½È«²¿±»É¾³ı ,ËµÃ÷²»¿ÉÒÔÍÆ³ö¿Õ 
+						//è‹¥å¯¼è‡´è¯¥éç»ˆç»“ç¬¦ä¸ºå·¦éƒ¨çš„äº§ç”Ÿå¼å…¨éƒ¨è¢«åˆ é™¤ ,è¯´æ˜ä¸å¯ä»¥æ¨å‡ºç©º 
 						attr.is2empty[VnIndex]=1;
 					}
-					else if(attr.is2empty[VnIndex]==0){//¸Ã·ÇÖÕ½á·û¿ÉÒÔÍÆµ¼³ö¿Õ 
+					else if(attr.is2empty[VnIndex]==0){//è¯¥éç»ˆç»“ç¬¦å¯ä»¥æ¨å¯¼å‡ºç©º 
 						count++;
 					} 
 				}
-				if(count==getRuleLength(rules[i])-1){//µ¼ÖÂ¸Ã²úÉúÊ½ÓÒ²¿¿ÉÒÔÍÆµ¼³ö¿Õ £¬¸Ã²úÉúÊ½¿ÉÒÔÍÆ³ö¿Õ£¬É¾³ıËùÓĞÒÔ¸Ã²úÉúÊ½×ó²¿Îª×ó²¿µÄ²úÉúÊ½ 
+				if(count==getRuleLength(rules[i])-1){//å¯¼è‡´è¯¥äº§ç”Ÿå¼å³éƒ¨å¯ä»¥æ¨å¯¼å‡ºç©º ï¼Œè¯¥äº§ç”Ÿå¼å¯ä»¥æ¨å‡ºç©ºï¼Œåˆ é™¤æ‰€æœ‰ä»¥è¯¥äº§ç”Ÿå¼å·¦éƒ¨ä¸ºå·¦éƒ¨çš„äº§ç”Ÿå¼ 
 					array[i]=0;
 					VnIndex = getVnIndex(rules[i][0],Vn,VnNum);
 					attr.index[VnIndex][0]=0;
-					attr.is2empty[VnIndex]=0;//¸ÄÎª¿ÉÍÆµ¼³ö¿Õ 
-					for(int k=1;k<attr.initNum[VnIndex]+1;k++){//É¾³ıÒÔÆäÎª×ó²¿µÄ²úÉúÊ½ 
+					attr.is2empty[VnIndex]=0;//æ”¹ä¸ºå¯æ¨å¯¼å‡ºç©º 
+					for(int k=1;k<attr.initNum[VnIndex]+1;k++){//åˆ é™¤ä»¥å…¶ä¸ºå·¦éƒ¨çš„äº§ç”Ÿå¼ 
 						if(attr.index[VnIndex][k]!=-1){
 							array[attr.index[VnIndex][k]]=0;
 							attr.index[VnIndex][k]=-1;
@@ -330,7 +330,7 @@ FIRST_X getFirstSet(char rules[200][100],int number,char Vn[200],char Vt[200],in
 		Ccount++;
 		for(int i=0;i<VnNum;i++){
 			rightEmptyNum=0;
-			for(int j=1;j<number;j++){//¶ÔÃ¿¸ö²úÉúÊ½½øĞĞ²éÑ¯ 
+			for(int j=1;j<number;j++){//å¯¹æ¯ä¸ªäº§ç”Ÿå¼è¿›è¡ŒæŸ¥è¯¢ 
 				if(rules[j][0]==FIRST.X[i]&&getRuleLength(rules[j])==2&&rules[j][1]=='$'&&!isRepeat(FIRST.set[i],-1,FIRST.count[i])){
 					FIRST.set[i][FIRST.count[i]]=-1;
 					FIRST.count[i]++;
@@ -338,19 +338,19 @@ FIRST_X getFirstSet(char rules[200][100],int number,char Vn[200],char Vt[200],in
 				else if(rules[j][0]==FIRST.X[i]&&getRuleLength(rules[j])==2&&rules[j][1]=='$'&&isRepeat(FIRST.set[i],-1,FIRST.count[i])){
 				}
 				else if(rules[j][0]==FIRST.X[i]&&getRuleLength(rules[j])>=2&&isVt(rules[j][1],Vt,VtNum)&&!isRepeat(FIRST.set[i],getVnIndex(rules[j][1],Vt,VtNum),FIRST.count[i])){
-					FIRST.set[i][FIRST.count[i]]=getVnIndex(rules[j][1],Vt,VtNum);//ÓÒ²¿µÚÒ»¸öÊÇÖÕ½á·û 
+					FIRST.set[i][FIRST.count[i]]=getVnIndex(rules[j][1],Vt,VtNum);//å³éƒ¨ç¬¬ä¸€ä¸ªæ˜¯ç»ˆç»“ç¬¦ 
 					FIRST.count[i]++;
 				}
 				else if(rules[j][0]==FIRST.X[i]&&getRuleLength(rules[j])>=2&&isVt(rules[j][1],Vt,VtNum)&&isRepeat(FIRST.set[i],getVnIndex(rules[j][1],Vt,VtNum),FIRST.count[i])){
 
 				}
-				else if(rules[j][0]==FIRST.X[i]&&getRuleLength(rules[j])>2&&isVt(rules[j][1],Vn,VnNum)){//ÓÒ²¿Ò»¸öÊÇ·ÇÖÕ½á·û 
+				else if(rules[j][0]==FIRST.X[i]&&getRuleLength(rules[j])>2&&isVt(rules[j][1],Vn,VnNum)){//å³éƒ¨ä¸€ä¸ªæ˜¯éç»ˆç»“ç¬¦ 
 					int VnNumber = getRuleLength(rules[j])-1;
 					int VnIndex = getVnIndex(rules[j][1],Vn,VnNum);
-					if(attr.is2empty[VnIndex]==0){//Èç¹û¸Ã·ÇÖÕ½á·û¿ÉÒÔÍÆµ¼³ö¿Õ 
+					if(attr.is2empty[VnIndex]==0){//å¦‚æœè¯¥éç»ˆç»“ç¬¦å¯ä»¥æ¨å¯¼å‡ºç©º 
 						rightEmptyNum++;
 						for(int k=0;k<FIRST.count[VnIndex];k++){
-							if(FIRST.set[VnIndex][k]>-1&&!isRepeat(FIRST.set[i],FIRST.set[VnIndex][k],FIRST.count[i])){//²»ÊÇ¿ÕÇÒÃ»ÓĞÖØ¸´µÄ¼ÓÈë 
+							if(FIRST.set[VnIndex][k]>-1&&!isRepeat(FIRST.set[i],FIRST.set[VnIndex][k],FIRST.count[i])){//ä¸æ˜¯ç©ºä¸”æ²¡æœ‰é‡å¤çš„åŠ å…¥ 
 								FIRST.set[i][FIRST.count[i]]=FIRST.set[VnIndex][k];
 								FIRST.count[i]++;
 							}
@@ -358,9 +358,9 @@ FIRST_X getFirstSet(char rules[200][100],int number,char Vn[200],char Vt[200],in
 							} 
 						} 
 					}
-					else{//µÚÒ»¸ö·ÇÖÕ½á·ûµ«ÊÇ²»¿ÉÍÆ³ö¿Õ,°ÑÕâ¸ö·ÇÖÕ½á·ûµÄfirst¼¯¼ÓÈë 
+					else{//ç¬¬ä¸€ä¸ªéç»ˆç»“ç¬¦ä½†æ˜¯ä¸å¯æ¨å‡ºç©º,æŠŠè¿™ä¸ªéç»ˆç»“ç¬¦çš„firsté›†åŠ å…¥ 
 						for(int k=0;k<FIRST.count[VnIndex];k++){
-							if(FIRST.set[VnIndex][k]>-1&&!isRepeat(FIRST.set[i],FIRST.set[VnIndex][k],FIRST.count[i])){//²»ÊÇ¿ÕÇÒÃ»ÓĞÖØ¸´µÄ¼ÓÈë 
+							if(FIRST.set[VnIndex][k]>-1&&!isRepeat(FIRST.set[i],FIRST.set[VnIndex][k],FIRST.count[i])){//ä¸æ˜¯ç©ºä¸”æ²¡æœ‰é‡å¤çš„åŠ å…¥ 
 								FIRST.set[i][FIRST.count[i]]=FIRST.set[VnIndex][k];
 								FIRST.count[i]++;
 							}
@@ -370,7 +370,7 @@ FIRST_X getFirstSet(char rules[200][100],int number,char Vn[200],char Vt[200],in
 						continue;
 					} 
 					for(int s=2;s<getRuleLength(rules[j]);s++){
-						if(isVt(rules[j][s],Vt,VtNum)){//ÓÒ±ßÊÇÖÕ½á·û £¬¿ÉÒÔ½áÊø¶Ô¸ÃĞĞ²úÉúÊ½µÄ´¦ÀíÁË 
+						if(isVt(rules[j][s],Vt,VtNum)){//å³è¾¹æ˜¯ç»ˆç»“ç¬¦ ï¼Œå¯ä»¥ç»“æŸå¯¹è¯¥è¡Œäº§ç”Ÿå¼çš„å¤„ç†äº† 
 							VnIndex = getVnIndex(rules[j][s],Vt,VtNum);
 							if(!isRepeat(FIRST.set[i],VnIndex,FIRST.count[i])){
 								FIRST.set[i][FIRST.count[i]]=VnIndex;
@@ -380,13 +380,13 @@ FIRST_X getFirstSet(char rules[200][100],int number,char Vn[200],char Vt[200],in
 							}
 							break; 
 						}
-						else{//ÊÇ·ÇÖÕ½á·û 
+						else{//æ˜¯éç»ˆç»“ç¬¦ 
 							VnIndex = getVnIndex(rules[j][s],Vn,VnNum);
-							if(attr.is2empty[VnIndex]==0){//¸Ãºó¼Ì·ÇÖÕ½á·û¿ÉÒÔÍÆµ¼³ö¿Õ 
+							if(attr.is2empty[VnIndex]==0){//è¯¥åç»§éç»ˆç»“ç¬¦å¯ä»¥æ¨å¯¼å‡ºç©º 
 								rightEmptyNum++;
 								if(rightEmptyNum==s){
 									for(int k=0;k<FIRST.count[VnIndex];k++){
-										if(FIRST.set[VnIndex][k]>-1&&!isRepeat(FIRST.set[i],FIRST.set[VnIndex][k],FIRST.count[i])){//²»ÊÇ¿ÕÇÒÃ»ÓĞÖØ¸´µÄ¼ÓÈë 
+										if(FIRST.set[VnIndex][k]>-1&&!isRepeat(FIRST.set[i],FIRST.set[VnIndex][k],FIRST.count[i])){//ä¸æ˜¯ç©ºä¸”æ²¡æœ‰é‡å¤çš„åŠ å…¥ 
 											FIRST.set[i][FIRST.count[i]]=FIRST.set[VnIndex][k];
 											FIRST.count[i]++;
 										}else{
@@ -394,9 +394,9 @@ FIRST_X getFirstSet(char rules[200][100],int number,char Vn[200],char Vt[200],in
 									} 
 								}
 							}
-							else{//½«ÏÂÒ»¸ö²»ÄÜÍÆ³ö¿ÕµÄ·ÇÖÕ½á·ûµÄfirst¼¯ÖĞ²»ÖØ¸´µÄÔªËØ¼ÓÈë 
+							else{//å°†ä¸‹ä¸€ä¸ªä¸èƒ½æ¨å‡ºç©ºçš„éç»ˆç»“ç¬¦çš„firsté›†ä¸­ä¸é‡å¤çš„å…ƒç´ åŠ å…¥ 
 								for(int k=0;k<FIRST.count[VnIndex];k++){
-									if(FIRST.set[VnIndex][k]>-1&&!isRepeat(FIRST.set[i],FIRST.set[VnIndex][k],FIRST.count[i])){//²»ÊÇ¿ÕÇÒÃ»ÓĞÖØ¸´µÄ¼ÓÈë 
+									if(FIRST.set[VnIndex][k]>-1&&!isRepeat(FIRST.set[i],FIRST.set[VnIndex][k],FIRST.count[i])){//ä¸æ˜¯ç©ºä¸”æ²¡æœ‰é‡å¤çš„åŠ å…¥ 
 										FIRST.set[i][FIRST.count[i]]=FIRST.set[VnIndex][k];
 										FIRST.count[i]++;
 									}
@@ -447,7 +447,7 @@ FIRST_X getFirstSet(char rules[200][100],int number,char Vn[200],char Vt[200],in
 }
 FRIST_Y getCovFirst(FIRST_X first,int addArray[20],int addCount,char Vn[200],char Vt[200],int VnNum,int VtNum,int type){
 	FRIST_Y FIRST;
-	//³õÊ¼»¯
+	//åˆå§‹åŒ–
 	char V;
 	int Xcount=0; 
 	int Vindex=0;
@@ -461,18 +461,18 @@ FRIST_Y getCovFirst(FIRST_X first,int addArray[20],int addCount,char Vn[200],cha
 	for(int i=0;i<addCount;i++){
 		if(addArray[i]!=-1){
 			V = first.X[addArray[i]];
-			if(isVt(V,Vt,VtNum)){//ÓöÉÏÖÕ½á·ûÔò½áÊø 
-				if(!isRepeat(FIRST.set,getVnIndex(V,Vt,VtNum),FIRST.count)){//ÊÇÖÕ½á·û£¬ÇÒÃ»ÓĞÔÚfirst¼¯ÖĞÖØ¸´
+			if(isVt(V,Vt,VtNum)){//é‡ä¸Šç»ˆç»“ç¬¦åˆ™ç»“æŸ 
+				if(!isRepeat(FIRST.set,getVnIndex(V,Vt,VtNum),FIRST.count)){//æ˜¯ç»ˆç»“ç¬¦ï¼Œä¸”æ²¡æœ‰åœ¨firsté›†ä¸­é‡å¤
 					FIRST.set[FIRST.count]=getVnIndex(V,Vt,VtNum);
 					FIRST.count++;
 				}
-				else{//ÊÇÖÕ½á·û£¬µ«ÊÇÔÚfirst¼¯ÖĞÖØ¸´ÁË
+				else{//æ˜¯ç»ˆç»“ç¬¦ï¼Œä½†æ˜¯åœ¨firsté›†ä¸­é‡å¤äº†
 				}
 				break;
 			}
-			if(isVt(V,Vn,VnNum)){//·ÇÖÕ½á·û ĞèÒª¼ÌĞø 
-				Vindex = getVnIndex(V,Vn,VnNum);//ÊÇ·ÇÖÕ½á·û
-				for(int j=0;j<first.count[Vindex];j++){//²éÕÒ×î³õfirst¼¯ºÏÖĞµÄµÚj¸öfirst¼¯ 
+			if(isVt(V,Vn,VnNum)){//éç»ˆç»“ç¬¦ éœ€è¦ç»§ç»­ 
+				Vindex = getVnIndex(V,Vn,VnNum);//æ˜¯éç»ˆç»“ç¬¦
+				for(int j=0;j<first.count[Vindex];j++){//æŸ¥æ‰¾æœ€åˆfirsté›†åˆä¸­çš„ç¬¬jä¸ªfirsté›† 
 					if(first.set[Vindex][j]>-1&&!isRepeat(FIRST.set,first.set[Vindex][j],FIRST.count)){
 						FIRST.set[FIRST.count]=first.set[Vindex][j];
 						FIRST.count++;
@@ -488,7 +488,7 @@ FRIST_Y getCovFirst(FIRST_X first,int addArray[20],int addCount,char Vn[200],cha
 						break;
 					}
 				}
-				if(!emflag){//µ±Ç°·ÇÖÕ½á·û²»¿É ÍÆµ¼³ö¿Õ£¬ÔòÍË³ö½áÊø 
+				if(!emflag){//å½“å‰éç»ˆç»“ç¬¦ä¸å¯ æ¨å¯¼å‡ºç©ºï¼Œåˆ™é€€å‡ºç»“æŸ 
 					break;
 				}
 			}
@@ -510,7 +510,7 @@ FOLLOW_X getFollowSet(char rules[200][100],int number,char Vn[200],char Vt[200],
 	int addCount=0;
 	int Ccount = 0;
 	int lastSet[400][40];
-	//³õÊ¼»¯
+	//åˆå§‹åŒ–
 	for(int i=0;i<VnNum;i++){
 		FOLLOW.X[i]=Vn[i]; 
 		FOLLOW.count[i]=0;
@@ -534,25 +534,25 @@ FOLLOW_X getFollowSet(char rules[200][100],int number,char Vn[200],char Vt[200],
 		int VnIndex = -1;
 		int leftIndex= -1;
 		bool is2Empty=false;
-		for(int i=1;i<number;i++){//ÔÚÃ¿¸ö²úÉúÊ½ÖĞÑ°ÕÒ 
+		for(int i=1;i<number;i++){//åœ¨æ¯ä¸ªäº§ç”Ÿå¼ä¸­å¯»æ‰¾ 
 			for(int j=1;j<getRuleLength(rules[i]);j++){
 				addCount=0;
-				//ÓÒ²¿º¬ÓĞ·ÇÖÕ½á·ûµÄ
+				//å³éƒ¨å«æœ‰éç»ˆç»“ç¬¦çš„
 				if(isVt(rules[i][j],Vn,VnNum)){
 					VnIndex = getVnIndex(rules[i][j],Vn,VnNum);
-					if(j+1>=getRuleLength(rules[i])&&addCount==0&&is2Empty){//Ö®ºóÃ»ÓĞ¸ú×ÅµÄÎÄ·¨·ûºÅ 
+					if(j+1>=getRuleLength(rules[i])&&addCount==0&&is2Empty){//ä¹‹åæ²¡æœ‰è·Ÿç€çš„æ–‡æ³•ç¬¦å· 
 						is2Empty = true;
 					}
 					else{
 						addCount=0;
 						is2Empty=false;
-						//ÁĞ³öfirst¼¯
+						//åˆ—å‡ºfirsté›†
 						for(int k=j+1;k<getRuleLength(rules[i]);k++){
-							if(isVt(rules[i][k],Vn,VnNum)){//ÊÇ·ÇÖÕ½á·û 
+							if(isVt(rules[i][k],Vn,VnNum)){//æ˜¯éç»ˆç»“ç¬¦ 
 								addArray[addCount]=getVnIndex(rules[i][k],Vn,VnNum);
 								addCount++;
 							}
-							else if(isVt(rules[i][k],Vt,VtNum)){//ÊÇÖÕ½á·û 
+							else if(isVt(rules[i][k],Vt,VtNum)){//æ˜¯ç»ˆç»“ç¬¦ 
 								addArray[addCount]=getVnIndex(rules[i][k],Vt,VtNum)+200;
 								addCount++;
 							}
@@ -572,12 +572,12 @@ FOLLOW_X getFollowSet(char rules[200][100],int number,char Vn[200],char Vt[200],
 							}
 							else if(first_y.set[k]>-1){
 							} 
-							else if(first_y.set[k]==-1){//º¬ÓĞ¿ÕµÄfirst¼¯ 
+							else if(first_y.set[k]==-1){//å«æœ‰ç©ºçš„firsté›† 
 							}
 						}
 					}
 					
-					if(is2Empty){//ºóÃæµÄÎÄ·¨·ûºÅ->¿ÉÍÆµ¼³ö¿Õ»òÕßÊÇºóÃæÃ»ÓĞÎÄ·¨·ûºÅ £¬»¹ĞèÒª¶îÍâ¼ÓÉÏFOLLOW(×ó²¿) 
+					if(is2Empty){//åé¢çš„æ–‡æ³•ç¬¦å·->å¯æ¨å¯¼å‡ºç©ºæˆ–è€…æ˜¯åé¢æ²¡æœ‰æ–‡æ³•ç¬¦å· ï¼Œè¿˜éœ€è¦é¢å¤–åŠ ä¸ŠFOLLOW(å·¦éƒ¨) 
 						leftIndex = getVnIndex(rules[i][0],Vn,VnNum);
 						for(int k=0;k<FOLLOW.count[leftIndex];k++){
 							if(!isRepeat(FOLLOW.set[VnIndex],FOLLOW.set[leftIndex][k],FOLLOW.count[VnIndex])){
@@ -588,7 +588,7 @@ FOLLOW_X getFollowSet(char rules[200][100],int number,char Vn[200],char Vt[200],
 							}
 						}				
 					}
-					else{//ºóÃæµÄÎÄ·¨·ûºÅ->²»¿ÉÍÆµ¼³ö¿Õ £¬°Ñµ±Ç°¸´ºÏµÄfirst¼¯¼ÓÈë¼´¿É 
+					else{//åé¢çš„æ–‡æ³•ç¬¦å·->ä¸å¯æ¨å¯¼å‡ºç©º ï¼ŒæŠŠå½“å‰å¤åˆçš„firsté›†åŠ å…¥å³å¯ 
 					}
 				} 
 				else{
@@ -618,7 +618,7 @@ FOLLOW_X getFollowSet(char rules[200][100],int number,char Vn[200],char Vt[200],
 			}
 		}
 		if(Ccount>=5){
-			cout<<"±»ÆÈ½áÊø"<<endl;
+			cout<<"è¢«è¿«ç»“æŸ"<<endl;
 			break;
 		}
 	}
@@ -626,15 +626,15 @@ FOLLOW_X getFollowSet(char rules[200][100],int number,char Vn[200],char Vt[200],
 }
 initItem getInitTtems(char rules[200][100],int number,char Vn[200],char Vt[200],int VnNum,int VtNum,char Start){
 	initItem init_I;
-	//³õÊ¼»¯
+	//åˆå§‹åŒ–
 	init_I.ruleIndex[0]=0;
 	init_I.potIndex[0]=0;
-	//I0:S'->¡¤Start
+	//I0:S'->Â·Start
 	init_I.ruleIndex[1]=0;
 	init_I.potIndex[1]=1;
-	//I1:S'->Start¡¤ 
+	//I1:S'->StartÂ· 
 	init_I.INum=2;
-	for(int i=1;i<number;i++){//×¢Òâ$µÄ³õÊ¼»¯ 
+	for(int i=1;i<number;i++){//æ³¨æ„$çš„åˆå§‹åŒ– 
 		for(int j=0;j<getRuleLength(rules[i]);j++){
 			if(getRuleLength(rules[i])==2&&rules[i][1]=='$'){
 				init_I.ruleIndex[init_I.INum]=i;
@@ -649,8 +649,8 @@ initItem getInitTtems(char rules[200][100],int number,char Vn[200],char Vt[200],
 			}
 		}
 	}
-	//Êä³ö³õÊ¼»¯¼ì²é 
-	cout<<"Ò»¹²²úÉúÁË"<<init_I.INum<<"Ìõ²úÉúÊ½"<<endl;
+	//è¾“å‡ºåˆå§‹åŒ–æ£€æŸ¥ 
+	cout<<"ä¸€å…±äº§ç”Ÿäº†"<<init_I.INum<<"æ¡äº§ç”Ÿå¼"<<endl;
 	return init_I;
 }
 Item setSets(char rules[200][100],int number,char Vn[200],char Vt[200],int VnNum,int VtNum,char Start,FIRST_X FIRST,ItemSet ISet,Item I_j,initItem INIT_I,int leftIndex,int ruleIndex,int potIndex){
@@ -672,7 +672,7 @@ Item setSets(char rules[200][100],int number,char Vn[200],char Vt[200],int VnNum
 	FIRST_T first_temp;
 	first_temp.count=0; 
 	for(int i=0;i<I_j.setCount;i++){
-		//Ã¿¸öµ¥¶À¼ÆËãclosureÖĞµÄ a
+		//æ¯ä¸ªå•ç‹¬è®¡ç®—closureä¸­çš„ a
 		addCount=betaNum;
 		addArray[addCount]=I_j.set[i];
 		if(I_j.set[i]!=-1){
@@ -698,7 +698,7 @@ ItemSet getNewItemSet(char rules[200][100],int number,char Vn[200],char Vt[200],
 	Item tempNode ;
 	int repeatIIndex;
 	bool isNewinSet=false;
-	//Ñ°ÕÒVn[leftIndex]¿ªÍ·µÄ¡¢potIndex=0µÄ²úÉúÊ½¼ÓÈë
+	//å¯»æ‰¾Vn[leftIndex]å¼€å¤´çš„ã€potIndex=0çš„äº§ç”Ÿå¼åŠ å…¥
 	for(int i=1;i<INIT_I.INum;i++){
 		if(rules[INIT_I.ruleIndex[i]][0]==Vn[leftIndex]&&INIT_I.potIndex[i]==0){
 			tempNode= setSets(rules,number,Vn,Vt,VnNum,VtNum,Start,FIRST,ISet,I_j,INIT_I,leftIndex,ruleIndex,potIndex);
@@ -746,7 +746,7 @@ ItemSet getNewItemSet(char rules[200][100],int number,char Vn[200],char Vt[200],
 				ISet.item[ISet.itemNum].attr[4]=-1;
 				ISet.item[ISet.itemNum].attr[5]=-1;
 				ISet.item[ISet.itemNum].attr[6]=0;
-				//¸´ÖÆfirst¼¯µ½closureÖĞ			 
+				//å¤åˆ¶firsté›†åˆ°closureä¸­			 
 				
 				for(int j=0;j<tempNode.setCount;j++){
 					ISet.item[ISet.itemNum].set[j]=tempNode.set[j];
@@ -806,7 +806,7 @@ void printItem(initItem INIT_I,char rules[200][100],Item item,char Vt[200],char 
 			cout<<"->";
 		}
 		if(potIndex==j){
-			cout<<"¡¤";
+			cout<<"Â·";
 		}
 	}
 	cout<<",";
@@ -830,14 +830,14 @@ void printItem(initItem INIT_I,char rules[200][100],Item item,char Vt[200],char 
 void printRule(char rules[200][100],int ruleIndex,int potIndex){
 	for(int j=0;j<ruleCount[ruleIndex];j++){
 		if(potIndex==j&&j!=0){
-			cout<<"¡¤";
+			cout<<"Â·";
 		}
 		cout<<rules[ruleIndex][j];
 		if(j==0){
 			cout<<"->";
 		}
 		if(potIndex==j&&j==0){
-			cout<<"¡¤";
+			cout<<"Â·";
 		}
 	}
 	cout<<"\n";
@@ -846,7 +846,7 @@ ItemSets getItemSets(initItem INIT_I,char rules[200][100],int number,char Vn[200
 	ItemSets ISets;
 	int Ccount=0;
 	int FilterNum=0;
-	//³õÊ¼»¯ÏîÄ¿¼¯
+	//åˆå§‹åŒ–é¡¹ç›®é›†
 	ISets.initI=INIT_I;
 	ISets.ISet[0].isCheck=false;
 	ISets.ISet[0].isFilter=false;
@@ -856,11 +856,11 @@ ItemSets getItemSets(initItem INIT_I,char rules[200][100],int number,char Vn[200
 	ISets.ISet[0].item[0].setCount=1;
 	ISets.ISet[0].item[0].attr[0]=0;//I_0
 	ISets.ISet[0].item[0].attr[1]=0;//I_0[0]
-	ISets.ISet[0].item[0].attr[2]=1;//×´Ì¬Î´Öª 
-	ISets.ISet[0].item[0].attr[3]=getVnIndex(Start,Vn,VnNum);//Vindex:Î´Öª 
-	ISets.ISet[0].item[0].attr[4]=1;//I_j Î´Öª»ò²»ĞèÒª 
-	ISets.ISet[0].item[0].attr[5]=0;//I_j[k] Î´Öª»ò²»ĞèÒª
-	ISets.ISet[0].item[0].attr[6]=0;//ÉĞÎ´Ïòºó¼ì²é
+	ISets.ISet[0].item[0].attr[2]=1;//çŠ¶æ€æœªçŸ¥ 
+	ISets.ISet[0].item[0].attr[3]=getVnIndex(Start,Vn,VnNum);//Vindex:æœªçŸ¥ 
+	ISets.ISet[0].item[0].attr[4]=1;//I_j æœªçŸ¥æˆ–ä¸éœ€è¦ 
+	ISets.ISet[0].item[0].attr[5]=0;//I_j[k] æœªçŸ¥æˆ–ä¸éœ€è¦
+	ISets.ISet[0].item[0].attr[6]=0;//å°šæœªå‘åæ£€æŸ¥
 	ISets.ISet[0].arrayNum=1;
 	ISets.ISet[0].array[0]=Start;
 	ISets.ISet[0].itemNum=1;
@@ -870,11 +870,11 @@ ItemSets getItemSets(initItem INIT_I,char rules[200][100],int number,char Vn[200
 	ISets.ISet[1].item[0].setCount=1;
 	ISets.ISet[1].item[0].attr[0]=1;//I_1
 	ISets.ISet[1].item[0].attr[1]=0;//I_1[0]
-	ISets.ISet[1].item[0].attr[2]=3;//×´Ì¬£ºacc 
-	ISets.ISet[1].item[0].attr[3]=-2;//Vindex:Î´Öª»ò²»ĞèÒª(attr[2]==2||attr[2]==3) 
-	ISets.ISet[1].item[0].attr[4]=-1;//I_j Î´Öª»ò²»ĞèÒª
-	ISets.ISet[1].item[0].attr[5]=-1;//I_j[k] Î´Öª»ò²»ĞèÒª
-	ISets.ISet[1].item[0].attr[6]=1;//ÒÑ¾­Ïòºó¼ì²é
+	ISets.ISet[1].item[0].attr[2]=3;//çŠ¶æ€ï¼šacc 
+	ISets.ISet[1].item[0].attr[3]=-2;//Vindex:æœªçŸ¥æˆ–ä¸éœ€è¦(attr[2]==2||attr[2]==3) 
+	ISets.ISet[1].item[0].attr[4]=-1;//I_j æœªçŸ¥æˆ–ä¸éœ€è¦
+	ISets.ISet[1].item[0].attr[5]=-1;//I_j[k] æœªçŸ¥æˆ–ä¸éœ€è¦
+	ISets.ISet[1].item[0].attr[6]=1;//å·²ç»å‘åæ£€æŸ¥
 	ISets.ISet[1].itemNum=1;
 	ISets.ISet[1].arrayNum=1;
 	ISets.ISet[1].array[0]='$'; 
@@ -884,10 +884,10 @@ ItemSets getItemSets(initItem INIT_I,char rules[200][100],int number,char Vn[200
 	ISets.changeMap[0][2]=1;
 	ISets.changeNum=1;
 	do{
-		//ÏÈÏòºó¼ì²é,½«Ã»ÓĞ¼ì²éµÄÏîÄ¿¼¯¼ì²éÍê 
+		//å…ˆå‘åæ£€æŸ¥,å°†æ²¡æœ‰æ£€æŸ¥çš„é¡¹ç›®é›†æ£€æŸ¥å®Œ 
 		for(int i=0;i<ISets.ISetNum;i++){
 			if(!isAllChecked(ISets.ISet[i])){
-				//¼ì²é¸ÃÏîÄ¿
+				//æ£€æŸ¥è¯¥é¡¹ç›®
 				for(int j=0;j<ISets.ISet[i].itemNum;j++){
 					if(ISets.ISet[i].item[j].attr[6]==0){
 						int initIndex = ISets.ISet[i].item[j].initIndex;
@@ -896,7 +896,7 @@ ItemSets getItemSets(initItem INIT_I,char rules[200][100],int number,char Vn[200
 						int leftIndex;
 						if(ruleIndex!=0&&rules[ruleIndex][potIndex+1]=='$'){
 							ISets.ISet[i].item[j].attr[6]=1;
-							ISets.ISet[i].item[j].attr[2]=2;//Ë³±ã´¦Àí×´Ì¬ 
+							ISets.ISet[i].item[j].attr[2]=2;//é¡ºä¾¿å¤„ç†çŠ¶æ€ 
 						}
 						else if(ruleIndex!=0&&isVt(rules[ruleIndex][potIndex+1],Vt,VtNum)){
 							ISets.ISet[i].item[j].attr[6]=1;
@@ -941,8 +941,8 @@ ItemSets getItemSets(initItem INIT_I,char rules[200][100],int number,char Vn[200
 						int potIndex = ISets.initI.potIndex[initIndex];
 						int Vindex = -2;
 						int repeatSet = -1;
-						if(ISets.ISet[i].item[j].attr[2]==-1){//¹ıÂËÄ¿±ê 
-							if(rules[ruleIndex][potIndex+1]=='$'){//×´Ì¬£º¹éÔ¼ÏîÄ¿ 
+						if(ISets.ISet[i].item[j].attr[2]==-1){//è¿‡æ»¤ç›®æ ‡ 
+							if(rules[ruleIndex][potIndex+1]=='$'){//çŠ¶æ€ï¼šå½’çº¦é¡¹ç›® 
 								ISets.ISet[i].item[j].attr[2]=2;
 								ISets.ISet[i].array[ISets.ISet[i].arrayNum]++; 
 								ISets.ISet[i].arrayNum++;
@@ -950,11 +950,11 @@ ItemSets getItemSets(initItem INIT_I,char rules[200][100],int number,char Vn[200
 								ISets.ISet[i].item[j].attr[5] = -1;
 							}
 							else{
-								if(isVt(rules[ruleIndex][potIndex+1],Vt,VtNum)){//×´Ì¬£ºÒÆ½øÏîÄ¿
+								if(isVt(rules[ruleIndex][potIndex+1],Vt,VtNum)){//çŠ¶æ€ï¼šç§»è¿›é¡¹ç›®
 									ISets.ISet[i].item[j].attr[2]=0; 
 									Vindex = getVnIndex(rules[ruleIndex][potIndex+1],Vt,VtNum)+200;
 								}
-								else if(isVt(rules[ruleIndex][potIndex+1],Vn,VnNum)){//×´Ì¬£º´ıÔ¼ÏîÄ¿ 
+								else if(isVt(rules[ruleIndex][potIndex+1],Vn,VnNum)){//çŠ¶æ€ï¼šå¾…çº¦é¡¹ç›® 
 									ISets.ISet[i].item[j].attr[2]=1;
 									Vindex = getVnIndex(rules[ruleIndex][potIndex+1],Vn,VnNum);
 								}
@@ -964,19 +964,19 @@ ItemSets getItemSets(initItem INIT_I,char rules[200][100],int number,char Vn[200
 								ISets.ISet[i].item[j].attr[3]=Vindex;//Vindex
 								int nextISetIndex=-1;
 								int nextIIndex=-1; 
-								//²éÕÒ¿´ÓĞÃ»ÓĞÒÑ¾­ÖØ¸´ÁËµÄ
+								//æŸ¥æ‰¾çœ‹æœ‰æ²¡æœ‰å·²ç»é‡å¤äº†çš„
 								bool ok1=false,ok2=false,ok3=false,ok4=false;
-								//ok1:Í¬Ò»¸ö¼¯ºÏÖĞ£¬ÊôÓÚÍ¬Ò»¸ö²úÉúÊ½£¬Í¬ÑùµÄÎ»ÖÃ
-								//ok2:×ª»¯º¯ÊıÊÇ·ñÒÑ´æÔÚ 
+								//ok1:åŒä¸€ä¸ªé›†åˆä¸­ï¼Œå±äºåŒä¸€ä¸ªäº§ç”Ÿå¼ï¼ŒåŒæ ·çš„ä½ç½®
+								//ok2:è½¬åŒ–å‡½æ•°æ˜¯å¦å·²å­˜åœ¨ 
 								//ok3:
-								//ok4:ĞÂ²úÉúµÄÏîÄ¿ÊÇ·ñÒÑ¾­ÔÚÆäËû¼¯ºÏÖĞ
+								//ok4:æ–°äº§ç”Ÿçš„é¡¹ç›®æ˜¯å¦å·²ç»åœ¨å…¶ä»–é›†åˆä¸­
 								ok1=isRepeatinISet(ISets.ISet[i],ISets.ISet[i].item[j],ruleIndex,potIndex,INIT_I);
 								int k1,k2,k3;
 								int repeatIsetIndex=-1;
 								int repeatIIndex=-1;
 								for(k1=0;k1<ISets.ISetNum;k1++){
 									for(k2=0;k2<ISets.ISet[k1].itemNum;k2++){
-										//ĞÂµÄinitIndex(i,jÖ®ºó)==±éÀúµÄÄ³¸ö½á¹û
+										//æ–°çš„initIndex(i,jä¹‹å)==éå†çš„æŸä¸ªç»“æœ
 										if(getInitIndex(INIT_I,ruleIndex,potIndex+1)==ISets.ISet[k1].item[k2].initIndex){
 											if(ISets.ISet[i].item[j].setCount==ISets.ISet[k1].item[k2].setCount){
 												ok4=true;
@@ -999,7 +999,7 @@ ItemSets getItemSets(initItem INIT_I,char rules[200][100],int number,char Vn[200
 									}
 								} 
 								for(int k1=0;k1<ISets.changeNum;k1++){
-									if(Vindex==ISets.changeMap[k1][1]&&ISets.changeMap[k1][0]==i){//fromIDÏàµÈÇÒVindexÓë×ª»»ÏàµÈ 
+									if(Vindex==ISets.changeMap[k1][1]&&ISets.changeMap[k1][0]==i){//fromIDç›¸ç­‰ä¸”Vindexä¸è½¬æ¢ç›¸ç­‰ 
 										ok2=true;
 										repeatSet=ISets.changeMap[k1][2];
 										break;
@@ -1064,7 +1064,7 @@ ItemSets getItemSets(initItem INIT_I,char rules[200][100],int number,char Vn[200
 									ok3=true;
 									nextIIndex=-1;
 									for(k2=0;k2<ISets.ISet[nextISetIndex].itemNum;k2++){
-										//ĞÂµÄinitIndex(i,jÖ®ºó)==±éÀúµÄÄ³¸ö½á¹û
+										//æ–°çš„initIndex(i,jä¹‹å)==éå†çš„æŸä¸ªç»“æœ
 										if(getInitIndex(INIT_I,ruleIndex,potIndex+1)==ISets.ISet[nextISetIndex].item[k2].initIndex){
 											if(ISets.ISet[i].item[j].setCount==ISets.ISet[nextISetIndex].item[k2].setCount){
 												ok3=true;
@@ -1111,14 +1111,14 @@ ItemSets getItemSets(initItem INIT_I,char rules[200][100],int number,char Vn[200
 								} 
 								ISets.ISet[i].item[j].attr[4]=repeatSet;//to I_j 
 								ISets.ISet[i].item[j].attr[5]=ISets.ISet[nextISetIndex].itemNum-1;//to I_j[k] 
-								ISets.ISet[i].item[j].attr[6]=1;//ÒÑ¾­¼ì²éÁË 
+								ISets.ISet[i].item[j].attr[6]=1;//å·²ç»æ£€æŸ¥äº† 
 								if(ok2){
 									
 								} 
 								else{
 									ISets.ISet[i].item[j].attr[4]=nextISetIndex;//to I_j 
 									ISets.ISet[i].item[j].attr[5]=nextIIndex;//to I_j[k] 
-									ISets.ISet[i].item[j].attr[6]=1;//ÒÑ¾­¼ì²éÁË 
+									ISets.ISet[i].item[j].attr[6]=1;//å·²ç»æ£€æŸ¥äº† 
 									ISets.changeMap[ISets.changeNum][0]=i;
 									ISets.changeMap[ISets.changeNum][1]=Vindex;
 									ISets.changeMap[ISets.changeNum][2]=nextISetIndex;
@@ -1160,7 +1160,7 @@ string to_String(int n){
     if(n==0){
     	return "0";
 	}
-    if (n < 0)// ´¦Àí¸ºÊı
+    if (n < 0)// å¤„ç†è´Ÿæ•°
     {
         m = 0 - m;
         j = 1;
@@ -1237,7 +1237,7 @@ wrongMsg test(string line,int action[50][50],int gotoT[50][50],char Vn[200],char
 	char lastleft;
 	bool isExit=false;
 	bool mustBreak=false;
-	cout<<setw(5)<<"²½Öè"<<setw(12)<<"×´Ì¬Õ»"<<setw(12)<<"·ûºÅÕ»"<<setw(12)<<"ÊäÈë´®"<<setw(12)<<"ACTION"<<setw(12)<<"GOTO"<<endl;
+	cout<<setw(5)<<"æ­¥éª¤"<<setw(12)<<"çŠ¶æ€æ ˆ"<<setw(12)<<"ç¬¦å·æ ˆ"<<setw(12)<<"è¾“å…¥ä¸²"<<setw(12)<<"ACTION"<<setw(12)<<"GOTO"<<endl;
 	while(1){
 		StackCount++;
 		cout<<setw(5)<<StackCount;
@@ -1267,13 +1267,13 @@ wrongMsg test(string line,int action[50][50],int gotoT[50][50],char Vn[200],char
 			VtIndex=getVnIndex(nowChar,Vt,VtNum);
 			col=VtIndex;
 			row=statusStack[statusNum-1];
-			cout<<"µ±Ç°×´Ì¬"<<row<<",µ±Ç°·ûºÅ"<<nowChar<<endl;
+			cout<<"å½“å‰çŠ¶æ€"<<row<<",å½“å‰ç¬¦å·"<<nowChar<<endl;
 			actionStack=action[row][col];
 		}
 		else if(nowChar=='#'){
 			row=statusStack[statusNum-1];
 			col=VtNum;
-			cout<<"µ±Ç°×´Ì¬"<<row<<",µ±Ç°·ûºÅ"<<nowChar<<endl;
+			cout<<"å½“å‰çŠ¶æ€"<<row<<",å½“å‰ç¬¦å·"<<nowChar<<endl;
 			actionStack=action[row][col];
 		}
 		if(actionStack>maxStatus){
@@ -1286,15 +1286,15 @@ wrongMsg test(string line,int action[50][50],int gotoT[50][50],char Vn[200],char
 		if(actionStack<0){
 			lastCount=ruleCount[-actionStack]-1;
 			lastleft=rules[-actionStack][0];
-			cout<<"²úÉúÊ½"<<-actionStack<<"Ò»¹²ÓĞ"<<lastCount<<"¸öÓÒ²¿£¬×ó²¿ÊÇ"<<lastleft<<endl;
+			cout<<"äº§ç”Ÿå¼"<<-actionStack<<"ä¸€å…±æœ‰"<<lastCount<<"ä¸ªå³éƒ¨ï¼Œå·¦éƒ¨æ˜¯"<<lastleft<<endl;
 			if(isVt(lastleft,Vn,VnNum)){
 				col = getVnIndex(lastleft,Vn,VnNum);
 				row = statusStack[statusNum-lastCount-1];
-				cout<<"Ç°Ò»¸ö×´Ì¬ÊÇ"<<row<<endl;
+				cout<<"å‰ä¸€ä¸ªçŠ¶æ€æ˜¯"<<row<<endl;
 				gotoStack=gotoT[row][col];
 			}
 			else{
-				cout<<"×ó²¿²»ÊÇVn"<<endl;
+				cout<<"å·¦éƒ¨ä¸æ˜¯Vn"<<endl;
 			}
 		}
 		else if(actionStack==0){
@@ -1331,7 +1331,7 @@ wrongMsg test(string line,int action[50][50],int gotoT[50][50],char Vn[200],char
 		else{
 			cout<<setw(12)<<gotoStack<<endl;
 		}
-		cout<<"ÒÑ´¦Àí"<<solvedNum<<"¸ö"<<endl;
+		cout<<"å·²å¤„ç†"<<solvedNum<<"ä¸ª"<<endl;
 		if(StackCount>=300||isExit||mustBreak){
 			break;
 		}
@@ -1351,7 +1351,7 @@ int main(){
 	int action[50][50]={200};
 	int gotoT[50][50]={0};
 	bool _isVn=false,_isVt=false,_isStart=false,_isRule=false;
-	//¶ÁÈ¡token±í 
+	//è¯»å–tokenè¡¨ 
 	tokenFile.open("TokenResult.txt",ios::in|ios::out);
 	if(!tokenFile){
 		cout<<"Fail to open the file 'TokenResult.txt' !"<<endl;
@@ -1382,14 +1382,14 @@ int main(){
 			type = false;
 		}
 		/*
-		//Êä³ötoken 
+		//è¾“å‡ºtoken 
 		for(int i=0;i<n;i++){
 			cout<<tokenArray[i].content<<":"<<tokenArray[i].type<<endl;
 		}
 		*/
 		tokenFile.close();
 	}
-	//¶ÁÈ¡ĞÂµÄ¹æÔò£¨²úÉúÊ½£© 
+	//è¯»å–æ–°çš„è§„åˆ™ï¼ˆäº§ç”Ÿå¼ï¼‰ 
 	ruleFile.open("rule2.txt",ios::in);
 	if(!ruleFile){
 		cout<<"Fail to open the file 'rule2.txt' !"<<endl;
@@ -1416,7 +1416,7 @@ int main(){
 		ruleFile.close();
 	}
 	
-	for(int i=0;i<ruleLine[0].length();i++){//´¦Àí²úÉúÊ½
+	for(int i=0;i<ruleLine[0].length();i++){//å¤„ç†äº§ç”Ÿå¼
 		if(ruleLine[0][i]=='{'){
 			if(!_isVn&&!_isVt){
 				_isVn=true;
@@ -1453,9 +1453,9 @@ int main(){
 		}
 	}
 	rules[0][1]=Start;
-	//ÅĞ¶Ï·ÇÖÕ½á·ûÊÇ·ñ¿Éµ½´ï¿Õ
+	//åˆ¤æ–­éç»ˆç»“ç¬¦æ˜¯å¦å¯åˆ°è¾¾ç©º
 	VnAttribute Vnattr = isEmpty(rules,m,Vn,Vt,VnNum,VtNum);
-	//¹¹ÔìÃ¿Ò»¸öÎÄ·¨·ûºÅµÄfirst¼¯ 
+	//æ„é€ æ¯ä¸€ä¸ªæ–‡æ³•ç¬¦å·çš„firsté›† 
 	cout<<"\n----first----"<<endl;
 	FIRST_X FIRST = getFirstSet(rules,m,Vn,Vt,VnNum,VtNum,Vnattr);
 	for(int i=0;i<VnNum;i++){
@@ -1478,13 +1478,13 @@ int main(){
 		}
 		cout<<endl;
 	}
-	//²âÊÔËæ»ú¹¹Ôìfirst¼¯ 
+	//æµ‹è¯•éšæœºæ„é€ firsté›† 
 	int addArray[20]={-1};
 	int addCount=0;
 	addArray[0]=getVnIndex('S',Vn,VnNum);
 	addArray[1]=getVnIndex('a',Vt,VtNum)+200;
 	FRIST_Y first_y = getCovFirst(FIRST,addArray,2,Vn,Vt,VnNum,VtNum,-1);
-	//¹¹ÔìÃ¿Ò»¸ö·ÇÖÕ½á·ûµÄfollow¼¯
+	//æ„é€ æ¯ä¸€ä¸ªéç»ˆç»“ç¬¦çš„followé›†
 	cout<<"\n----follow----"<<endl;
 	FOLLOW_X FOLLOW = getFollowSet(rules,m,Vn,Vt,VnNum,VtNum,Start,FIRST);
 	for(int i=0;i<VnNum;i++){
@@ -1498,11 +1498,11 @@ int main(){
 		cout<<endl;
 	}
 	
-	//ĞÂ¹æÔò¹¹Ôì LR_1ÏîÄ¿
+	//æ–°è§„åˆ™æ„é€  LR_1é¡¹ç›®
 	initItem INIT_I = getInitTtems(rules,m,Vn,Vt,VnNum,VtNum,Start);
 	ItemSets ISets = getItemSets(INIT_I,rules,m,Vn,Vt,VnNum,VtNum,Start,FIRST,ruleCount);
 	//ItemSet ISet=getISet(rules,m,Vn,Vt,VnNum,VtNum,Start,FIRST);
-	//ÊäËÍ³öÀ´¿´Ò»ÏÂ
+	//è¾“é€å‡ºæ¥çœ‹ä¸€ä¸‹
 	for(int i=0;i<ISets.ISetNum;i++){
 		cout<<"I["<<i<<"]------------------------\n";
 		for(int k2 =0;k2<ISets.ISet[i].itemNum;k2++){
@@ -1511,7 +1511,7 @@ int main(){
 		}
 	} 
 	printChange(ISets.changeMap,ISets.changeNum,Vn,Vt,VnNum,VtNum);
-	//´¦ÀíACTION-GOTO±í 
+	//å¤„ç†ACTION-GOTOè¡¨ 
 	for(int i=0;i<ISets.ISetNum;i++){
 		for(int j=0;j<VtNum+1;j++){
 			action[i][j]=200;
@@ -1567,7 +1567,7 @@ int main(){
 			gotoT[ISets.changeMap[i][0]][ISets.changeMap[i][1]]=ISets.changeMap[i][2];
 		}
 	}
-	//Êä³ö²é¿´ACTION-GOTO±í 
+	//è¾“å‡ºæŸ¥çœ‹ACTION-GOTOè¡¨ 
 	cout<<setw(3)<<" ";
 	for(int i=0;i<VnNum+VtNum+1;i++){
 		if(i<VtNum){
@@ -1601,7 +1601,7 @@ int main(){
 		}
 		cout<<endl;
 	}
-	//¿ªÊ¼Óï·¨·ÖÎö
+	//å¼€å§‹è¯­æ³•åˆ†æ
 	string line;
 	cin>>line;
 	wrongMsg test1=test(line,action,gotoT,Vn,Vt,VnNum,VtNum,rules,ISets.ISetNum); 
@@ -1610,7 +1610,7 @@ int main(){
 	}
 	else{
 		cout<<"NO"<<endl;
-		cout<<"WRONG MESSAGE:Î»ÓÚµÚ"<<test1.row<<"ĞĞ¡¢µÚ"<<test1.col+1<<"¸ö,×Ö·û'"<<test1.wrongChar<<"'¶àÓà"<<endl; 
+		cout<<"WRONG MESSAGE:ä½äºç¬¬"<<test1.row<<"è¡Œã€ç¬¬"<<test1.col+1<<"ä¸ª,å­—ç¬¦'"<<test1.wrongChar<<"'å¤šä½™"<<endl; 
 	} 
 	return 0;
 }
